@@ -73,6 +73,7 @@ export function ResultsPageClient(props: Props) {
                 mode={page.editing ? "edit" : "create"}
                 initialValues={page.initialValues}
                 onSubmit={page.submit}
+                submitting={page.submitting}
                 onCancelEdit={() => {
                   page.setEditing(null);
                   page.setServerFieldErrors(null);
@@ -95,6 +96,7 @@ export function ResultsPageClient(props: Props) {
             >
               <ResultsTable
                 results={page.results}
+                loading={page.loadingList}
                 selectedIds={page.selectedIds}
                 onToggle={page.toggle}
                 onToggleMany={page.toggleMany}
@@ -117,6 +119,7 @@ export function ResultsPageClient(props: Props) {
       <DeleteRecordsDialog
         open={page.deleteConfirmOpen}
         selectedCount={page.selectedIds.size}
+        loading={page.deleting}
         onClose={() => page.setDeleteConfirmOpen(false)}
         onConfirm={() => void page.confirmDeleteSelected()}
       />

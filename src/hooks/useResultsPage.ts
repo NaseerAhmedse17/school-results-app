@@ -17,6 +17,9 @@ export function useResultsPage(props: { initialResults: ResultListItem[] }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [editing, setEditing] = useState<ResultListItem | null>(null);
   const [serverFieldErrors, setServerFieldErrors] = useState<ResultFieldErrors | null>(null);
+  const [loadingList, setLoadingList] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     open: false,
     message: "",
@@ -38,39 +41,49 @@ export function useResultsPage(props: { initialResults: ResultListItem[] }) {
   }, []);
 
   const refresh = useCallback(async () => {
-    const res = await fetch("/api/results", { cache: "no-store" });
-    const data = await readJson<{ results: ResultListItem[] }>(res);
-    setResults(data.results);
-    setSelectedIds(new Set());
+    setLoadingList(true);
+    try {
+      const res = await fetch("/api/results", { cache: "no-store" });
+      const data = await readJson<{ results: ResultListItem[] }>(res);
+      setResults(data.results);
+      setSelectedIds(new Set());
+    } finally {
+      setLoadingList(false);
+    }
   }, []);
 
   const submit = useCallback(
     async (values: { fullName: string; marks: number; feePaid: boolean }) => {
       setServerFieldErrors(null);
       const isEdit = Boolean(editing);
-      const res = await fetch(isEdit ? `/api/results/${editing!.id}` : "/api/results", {
-        method: isEdit ? "PUT" : "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(values),
-      });
+      setSubmitting(true);
+      try {
+        const res = await fetch(isEdit ? `/api/results/${editing!.id}` : "/api/results", {
+          method: isEdit ? "PUT" : "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(values),
+        });
 
-      if (!res.ok) {
-        const err = await readJson<ClientApiErrorBody>(res);
-        const fields = normalizeFieldErrors(err.error?.fieldErrors);
-        if (fields) {
-          setServerFieldErrors(fields);
+        if (!res.ok) {
+          const err = await readJson<ClientApiErrorBody>(res);
+          const fields = normalizeFieldErrors(err.error?.fieldErrors);
+          if (fields) {
+            setServerFieldErrors(fields);
+            return;
+          }
+          showSnackbar(err.error?.message ?? "Could not save the result.", "error");
           return;
         }
-        showSnackbar(err.error?.message ?? "Could not save the result.", "error");
-        return;
-      }
 
-      setEditing(null);
-      await refresh();
-      showSnackbar(
-        isEdit ? "Student result updated successfully." : "Student result added successfully.",
-        "success"
-      );
+        setEditing(null);
+        await refresh();
+        showSnackbar(
+          isEdit ? "Student result updated successfully." : "Student result added successfully.",
+          "success"
+        );
+      } finally {
+        setSubmitting(false);
+      }
     },
     [editing, refresh, showSnackbar]
   );
@@ -104,20 +117,25 @@ export function useResultsPage(props: { initialResults: ResultListItem[] }) {
     if (selectedIds.size === 0) return;
     setDeleteConfirmOpen(false);
     const ids = Array.from(selectedIds);
-    const res = await fetch("/api/results", {
-      method: "DELETE",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ids }),
-    });
-    if (!res.ok) {
-      const err = await readJson<ClientApiErrorBody>(res);
-      showSnackbar(err.error?.message ?? "Could not delete the selected records.", "error");
-      return;
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/results", {
+        method: "DELETE",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      if (!res.ok) {
+        const err = await readJson<ClientApiErrorBody>(res);
+        showSnackbar(err.error?.message ?? "Could not delete the selected records.", "error");
+        return;
+      }
+      const data = await readJson<{ deletedCount: number }>(res);
+      const n = data.deletedCount ?? ids.length;
+      await refresh();
+      showSnackbar(n === 1 ? "Successfully deleted 1 record." : `Successfully deleted ${n} records.`, "success");
+    } finally {
+      setDeleting(false);
     }
-    const data = await readJson<{ deletedCount: number }>(res);
-    const n = data.deletedCount ?? ids.length;
-    await refresh();
-    showSnackbar(n === 1 ? "Successfully deleted 1 record." : `Successfully deleted ${n} records.`, "success");
   }, [selectedIds, refresh, showSnackbar]);
 
   return {
@@ -129,6 +147,9 @@ export function useResultsPage(props: { initialResults: ResultListItem[] }) {
     serverFieldErrors,
     setServerFieldErrors,
     initialValues,
+    loadingList,
+    submitting,
+    deleting,
     snackbar,
     closeSnackbar,
     deleteConfirmOpen,

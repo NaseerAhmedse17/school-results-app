@@ -13,6 +13,7 @@ import {
   Chip,
   IconButton,
   Paper,
+  Skeleton,
   Stack,
   Table,
   TableBody,
@@ -29,12 +30,73 @@ import { alpha, useTheme } from "@mui/material/styles";
 import { useMemo, useState } from "react";
 import { MobileResultCard } from "@/components/results/MobileResultCard";
 import { ResultStatusChip } from "@/components/results/ResultStatusChip";
-import { ResultListItem } from "@/lib/results/contracts";
+import type { ResultListItem, ResultStatusLabel } from "@/lib/results/contracts";
 
 const ROWS_PER_PAGE = 5;
 
+function getClientStatusLabel(r: Pick<ResultListItem, "marks" | "feePaid">): ResultStatusLabel {
+  if (r.marks < 60) return "Fail";
+  return r.feePaid ? "Pass" : "Pay fees to check result";
+}
+
+function TableSkeleton() {
+  return (
+    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, overflow: "hidden" }}>
+      <Table size="medium">
+        <TableHead>
+          <TableRow>
+            <TableCell padding="checkbox">
+              <Skeleton variant="rectangular" width={22} height={22} />
+            </TableCell>
+            <TableCell>
+              <Skeleton width={160} />
+            </TableCell>
+            <TableCell align="center">
+              <Skeleton width={60} sx={{ mx: "auto" }} />
+            </TableCell>
+            <TableCell align="center">
+              <Skeleton width={80} sx={{ mx: "auto" }} />
+            </TableCell>
+            <TableCell>
+              <Skeleton width={140} />
+            </TableCell>
+            <TableCell align="right">
+              <Skeleton width={40} sx={{ ml: "auto" }} />
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {Array.from({ length: ROWS_PER_PAGE }).map((_, i) => (
+            <TableRow key={i}>
+              <TableCell padding="checkbox">
+                <Skeleton variant="rectangular" width={22} height={22} />
+              </TableCell>
+              <TableCell>
+                <Skeleton width="60%" />
+              </TableCell>
+              <TableCell align="center">
+                <Skeleton width={48} sx={{ mx: "auto" }} />
+              </TableCell>
+              <TableCell align="center">
+                <Skeleton width={64} sx={{ mx: "auto" }} />
+              </TableCell>
+              <TableCell>
+                <Skeleton width={190} />
+              </TableCell>
+              <TableCell align="right">
+                <Skeleton variant="circular" width={28} height={28} sx={{ ml: "auto" }} />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
+
 export function ResultsTable(props: {
   results: ResultListItem[];
+  loading?: boolean;
   selectedIds: Set<string>;
   onToggle: (id: string, checked: boolean) => void;
   /** Select or clear all rows on the current page only */
@@ -49,6 +111,7 @@ export function ResultsTable(props: {
   const [page, setPage] = useState(0);
 
   const fill = Boolean(props.fillAvailableHeight);
+  const loading = Boolean(props.loading);
 
   const maxPage = Math.max(0, Math.ceil(props.results.length / ROWS_PER_PAGE) - 1);
   const safePage = Math.min(page, maxPage);
@@ -126,7 +189,7 @@ export function ResultsTable(props: {
                 color="error"
                 startIcon={<DeleteOutlineRoundedIcon />}
                 onClick={props.onDeleteSelected}
-                disabled={props.selectedIds.size === 0}
+                disabled={props.selectedIds.size === 0 || loading}
                 sx={{ mr: { xs: 0, sm: 1 }, mt: { xs: 1, sm: 0 } }}
               >
                 Delete
@@ -152,7 +215,32 @@ export function ResultsTable(props: {
           overflow: fill ? "hidden" : undefined,
         }}
       >
-        {props.results.length === 0 ? (
+        {loading ? (
+          <Box sx={{ flex: fill ? 1 : undefined, minHeight: fill ? 0 : undefined }}>
+            {isMobile ? (
+              <Stack spacing={2}>
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Paper key={i} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                    <Stack direction="row" spacing={1.5}>
+                      <Skeleton variant="rectangular" width={22} height={22} />
+                      <Box sx={{ flex: 1 }}>
+                        <Skeleton width="55%" height={24} />
+                        <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 1 }}>
+                          <Skeleton variant="rounded" width={72} height={24} />
+                          <Skeleton variant="rounded" width={92} height={24} />
+                          <Skeleton variant="rounded" width={190} height={24} />
+                        </Stack>
+                        <Skeleton width={84} height={32} sx={{ mt: 1.25 }} />
+                      </Box>
+                    </Stack>
+                  </Paper>
+                ))}
+              </Stack>
+            ) : (
+              <TableSkeleton />
+            )}
+          </Box>
+        ) : props.results.length === 0 ? (
           <Paper
             variant="outlined"
             sx={{
@@ -264,16 +352,11 @@ export function ResultsTable(props: {
                             </TableCell>
                             <TableCell align="center">{r.feePaid ? "Yes" : "No"}</TableCell>
                             <TableCell>
-                              <ResultStatusChip label={r.statusLabel} />
+                              <ResultStatusChip label={getClientStatusLabel(r)} />
                             </TableCell>
                             <TableCell align="right">
                               <Tooltip title="Edit">
-                                <IconButton
-                                  size="small"
-                                  color="primary"
-                                  onClick={() => props.onEdit(r)}
-                                  aria-label={`Edit ${r.fullName}`}
-                                >
+                                <IconButton size="small" color="primary" onClick={() => props.onEdit(r)} aria-label={`Edit ${r.fullName}`}>
                                   <EditRoundedIcon fontSize="small" />
                                 </IconButton>
                               </Tooltip>

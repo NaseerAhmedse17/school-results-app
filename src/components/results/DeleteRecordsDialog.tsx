@@ -1,19 +1,22 @@
 "use client";
 
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 
 type Props = {
   open: boolean;
   selectedCount: number;
+  loading?: boolean;
   onClose: () => void;
   onConfirm: () => void;
 };
 
-export function DeleteRecordsDialog({ open, selectedCount, onClose, onConfirm }: Props) {
+export function DeleteRecordsDialog({ open, selectedCount, loading, onClose, onConfirm }: Props) {
+  const isLoading = Boolean(loading);
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={isLoading ? undefined : onClose}
+      disableScrollLock
       aria-labelledby="delete-dialog-title"
       aria-describedby="delete-dialog-description"
       PaperProps={{ sx: { borderRadius: 2 } }}
@@ -25,11 +28,18 @@ export function DeleteRecordsDialog({ open, selectedCount, onClose, onConfirm }:
         </DialogContentText>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} color="inherit">
+        <Button onClick={onClose} color="inherit" disabled={isLoading}>
           Cancel
         </Button>
-        <Button onClick={onConfirm} color="error" variant="contained" autoFocus>
-          Delete
+        <Button
+          onClick={onConfirm}
+          color="error"
+          variant="contained"
+          autoFocus
+          disabled={isLoading}
+          startIcon={isLoading ? <CircularProgress size={18} color="inherit" /> : undefined}
+        >
+          {isLoading ? "Deleting…" : "Delete"}
         </Button>
       </DialogActions>
     </Dialog>

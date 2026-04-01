@@ -9,6 +9,7 @@ import {
   CardContent,
   CardHeader,
   Chip,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -57,6 +58,7 @@ export function ResultsForm(props: {
   mode: "create" | "edit";
   initialValues: ResultFormValues;
   onSubmit: (values: { fullName: string; marks: number; feePaid: boolean }) => Promise<void>;
+  submitting?: boolean;
   onCancelEdit?: () => void;
   /** Server-side validation (400) — shown inline under fields */
   serverFieldErrors?: ResultFieldErrors | null;
@@ -84,6 +86,7 @@ export function ResultsForm(props: {
   }
 
   async function handleSubmit() {
+    if (props.submitting) return;
     const issues = collectClientValidationIssues(values, parsedMarks);
     if (issues.length > 0) {
       setValidationDialog({ open: true, issues });
@@ -98,6 +101,7 @@ export function ResultsForm(props: {
   }
 
   const compact = Boolean(props.compact);
+  const submitting = Boolean(props.submitting);
 
   const showFullNameError = Boolean(serverErrors.fullName);
   const showMarksError = Boolean(serverErrors.marks);
@@ -174,6 +178,7 @@ export function ResultsForm(props: {
               label="Full name"
               placeholder="e.g. Trevor Bouchard"
               value={values.fullName}
+              disabled={submitting}
               onChange={(e) => {
                 setValues((p) => ({ ...p, fullName: e.target.value }));
                 clearServerErrorsOnEdit();
@@ -200,6 +205,7 @@ export function ResultsForm(props: {
               label="Marks"
               placeholder="1 – 100"
               value={values.marks}
+              disabled={submitting}
               onChange={(e) => {
                 setValues((p) => ({ ...p, marks: e.target.value }));
                 clearServerErrorsOnEdit();
@@ -221,6 +227,7 @@ export function ResultsForm(props: {
             <FormControl
               error={showFeeError}
               required
+              disabled={submitting}
               sx={{ width: "100%" }}
               component="fieldset"
               variant="standard"
@@ -265,11 +272,19 @@ export function ResultsForm(props: {
               fullWidth={false}
               sx={{ minWidth: 160 }}
               type="button"
+              disabled={submitting}
+              startIcon={submitting ? <CircularProgress size={18} color="inherit" /> : undefined}
             >
-              {props.mode === "edit" ? "Save changes" : "Submit result"}
+              {props.mode === "edit" ? (submitting ? "Saving…" : "Save changes") : submitting ? "Submitting…" : "Submit result"}
             </Button>
             {props.mode === "edit" ? (
-              <Button variant="outlined" size={compact ? "medium" : "large"} onClick={props.onCancelEdit} sx={{ minWidth: 120 }}>
+              <Button
+                variant="outlined"
+                size={compact ? "medium" : "large"}
+                onClick={props.onCancelEdit}
+                disabled={submitting}
+                sx={{ minWidth: 120 }}
+              >
                 Cancel
               </Button>
             ) : null}
@@ -283,6 +298,7 @@ export function ResultsForm(props: {
         maxWidth="sm"
         fullWidth
         scroll="paper"
+        disableScrollLock
         aria-labelledby="validation-dialog-title"
         aria-describedby="validation-dialog-description"
         slotProps={{

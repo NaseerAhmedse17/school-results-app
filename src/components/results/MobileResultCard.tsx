@@ -3,7 +3,7 @@
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import { Box, Button, Checkbox, Chip, Paper, Stack, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import type { ResultListItem } from "@/lib/results/contracts";
+import type { ResultListItem, ResultStatusLabel } from "@/lib/results/contracts";
 import { ResultStatusChip } from "@/components/results/ResultStatusChip";
 
 type Props = {
@@ -12,6 +12,11 @@ type Props = {
   onToggle: (checked: boolean) => void;
   onEdit: () => void;
 };
+
+function getClientStatusLabel(r: Pick<ResultListItem, "marks" | "feePaid">): ResultStatusLabel {
+  if (r.marks < 60) return "Fail";
+  return r.feePaid ? "Pass" : "Pay fees to check result";
+}
 
 export function MobileResultCard({ row, selected, onToggle, onEdit }: Props) {
   return (
@@ -38,7 +43,7 @@ export function MobileResultCard({ row, selected, onToggle, onEdit }: Props) {
           <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 1 }}>
             <Chip size="small" variant="outlined" label={`${row.marks} pts`} />
             <Chip size="small" variant="outlined" label={row.feePaid ? "Fee paid" : "Fee unpaid"} />
-            <ResultStatusChip label={row.statusLabel} />
+            <ResultStatusChip label={getClientStatusLabel(row)} />
           </Stack>
           <Box sx={{ mt: 1.5 }}>
             <Button size="small" startIcon={<EditRoundedIcon fontSize="small" />} onClick={onEdit} sx={{ textTransform: "none" }}>
