@@ -1,13 +1,6 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --page-bg: #e8eef4;
+  --foreground: #0f172a;
 }
 
 html {
@@ -16,8 +9,9 @@ html {
 
 html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
+  /* Use 100% — 100vw ignores the scrollbar and can clip the right edge with overflow-x hidden */
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 body {
@@ -25,25 +19,17 @@ body {
   display: flex;
   flex-direction: column;
   color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--page-bg);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
 a {
   color: inherit;
   text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
 }
