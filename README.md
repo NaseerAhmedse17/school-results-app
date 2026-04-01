@@ -127,8 +127,6 @@ Error shape:
 
 ```text
 school-results-app/
-  .env
-  .env.example
   .gitignore
   README.md
   package.json
