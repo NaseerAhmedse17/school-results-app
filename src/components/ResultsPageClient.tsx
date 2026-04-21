@@ -294,70 +294,72 @@ export function ResultsPageClient(props: Props) {
           disabled={page.deleting || page.submitting}
         />
 
-        <table className="gridTable" cellSpacing="0" cellPadding="0">
-          <tbody>
-            <tr>
-              <td style={{ width: 20 }} className="heading-cell">
-                &nbsp;
-              </td>
-              <td className="heading-cell">Full Name</td>
-              <td className="heading-cell">Marks</td>
-              <td className="heading-cell">Fee Paid</td>
-              <td className="heading-cell">Pass/Fail</td>
-              <td className="heading-cell">Edit</td>
-            </tr>
+        <div className="gridScroll" aria-label="Results grid">
+          <table className="gridTable" cellSpacing="0" cellPadding="0">
+            <tbody>
+              <tr>
+                <td style={{ width: 20 }} className="heading-cell">
+                  &nbsp;
+                </td>
+                <td className="heading-cell">Full Name</td>
+                <td className="heading-cell">Marks</td>
+                <td className="heading-cell">Fee Paid</td>
+                <td className="heading-cell">Pass/Fail</td>
+                <td className="heading-cell">Edit</td>
+              </tr>
 
-            {page.loadingList ? (
-              <tr>
-                <td className="grid-cell" colSpan={6}>
-                  <span className="spinner" />
-                  Loading…
-                </td>
-              </tr>
-            ) : page.results.length === 0 ? (
-              <tr>
-                <td className="grid-cell" colSpan={6}>
-                  No records yet.
-                </td>
-              </tr>
-            ) : (
-              pageRows.map((r, idx) => {
-              const status = getStatus(r);
-                const absoluteIndex = pageStart + idx;
-                const rowClass = absoluteIndex % 2 === 1 ? "alternateRowColor" : undefined;
-                return (
-                  <tr key={r.id} className={rowClass}>
-                    <td className="grid-cell">
-                      <input
-                        type="checkbox"
-                        checked={page.selectedIds.has(r.id)}
-                        onChange={(e) => page.toggle(r.id, e.target.checked)}
-                      />
-                    </td>
-                    <td className="grid-cell">{r.fullName}</td>
-                    <td className="grid-cell">{r.marks}</td>
-                    <td className="grid-cell">{r.feePaid ? "Yes" : "No"}</td>
-                    <td className="grid-cell">
-                      {status.className ? <span className={status.className}>{status.text}</span> : status.text}
-                    </td>
-                    <td className="grid-cell">
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          page.setServerFieldErrors(null);
-                          page.setEditing(r);
-                        }}
-                      >
-                        Edit
-                      </a>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+              {page.loadingList ? (
+                <tr>
+                  <td className="grid-cell" colSpan={6}>
+                    <span className="spinner" />
+                    Loading…
+                  </td>
+                </tr>
+              ) : page.results.length === 0 ? (
+                <tr>
+                  <td className="grid-cell" colSpan={6}>
+                    No records yet.
+                  </td>
+                </tr>
+              ) : (
+                pageRows.map((r, idx) => {
+                  const status = getStatus(r);
+                  const absoluteIndex = pageStart + idx;
+                  const rowClass = absoluteIndex % 2 === 1 ? "alternateRowColor" : undefined;
+                  return (
+                    <tr key={r.id} className={rowClass}>
+                      <td className="grid-cell">
+                        <input
+                          type="checkbox"
+                          checked={page.selectedIds.has(r.id)}
+                          onChange={(e) => page.toggle(r.id, e.target.checked)}
+                        />
+                      </td>
+                      <td className="grid-cell">{r.fullName}</td>
+                      <td className="grid-cell">{r.marks}</td>
+                      <td className="grid-cell">{r.feePaid ? "Yes" : "No"}</td>
+                      <td className="grid-cell">
+                        {status.className ? <span className={status.className}>{status.text}</span> : status.text}
+                      </td>
+                      <td className="grid-cell">
+                        <a
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            page.setServerFieldErrors(null);
+                            page.setEditing(r);
+                          }}
+                        >
+                          Edit
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {page.results.length > pageSize ? (
           <div style={{ marginTop: 8 }}>

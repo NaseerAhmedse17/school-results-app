@@ -264,6 +264,9 @@ legend {
 .main-grid {
   margin: 30px 0 10px 130px;
 }
+.gridScroll {
+  margin-top: 8px;
+}
 .gridTable {
   margin: 8px 0 0 0;
 }
@@ -301,5 +304,40 @@ legend {
 .red {
   color: red;
   font-weight: bold;
+}
+
+/********************* MOBILE RESPONSIVENESS ************************/
+
+@media (max-width: 680px) {
+  .formDiv {
+    padding: 16px 12px 16px 12px;
+  }
+
+  .cell-one {
+    width: 92px;
+  }
+
+  .cell-two {
+    width: auto;
+  }
+
+  .big-field {
+    width: 220px;
+  }
+
+  .main-grid {
+    margin: 18px 12px 12px 12px;
+  }
+
+  .gridScroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid #ddd;
+  }
+
+  .gridTable {
+    margin: 0;
+    min-width: 560px; /* allow horizontal scroll instead of squishing */
+  }
 }
 
