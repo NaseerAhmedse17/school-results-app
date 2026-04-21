@@ -1,0 +1,305 @@
+/* Pattern CSS required by the provided Test.html/style.css. */
+* {
+  margin: 0;
+  padding: 0;
+}
+img {
+  border: 0;
+}
+.clearboth {
+  clear: both;
+}
+td {
+  vertical-align: top;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  background: #fff;
+  font: 14px/18px arial;
+  display: block; /* override app globals (flex layout) */
+}
+
+/* Restore classic link styling (globals.css removes it). */
+a {
+  color: #0000ee;
+  text-decoration: underline;
+}
+a:visited {
+  color: #551a8b;
+}
+
+/******************* FORM ********************************/
+
+.dropdown {
+  width: 185px;
+  font: 90%/130% arial, helvetica;
+  color: #333;
+  padding: 2px 0px 0 3px;
+  border-top: solid 1px #ccc;
+  border-left: solid 1px #ccc;
+  border-bottom: solid 1px #ccc;
+  border-right: solid 1px #ccc;
+  background: #f7f9fa;
+}
+.none {
+  border: none;
+  background: #f7f9fa;
+  margin: 1px 5px 0 0;
+}
+
+.big-field {
+  width: 180px;
+  margin-right: 6px;
+  font: 12px/130% arial, helvetica;
+  color: #333;
+  height: 16px;
+  padding: 2px 0px 0 3px;
+  border-top: solid 1px #67676a;
+  border-left: solid 1px #67676a;
+  border-bottom: solid 1px #ccc;
+  border-right: solid 1px #ccc;
+  background: #f7f9fa;
+}
+.big-field:focus {
+  background: #ffffff;
+  border-top-color: #265e99;
+  border-left-color: #265e99;
+  border-right-color: #8fb2d6;
+  border-bottom-color: #8fb2d6;
+  outline: none;
+}
+.small-field {
+  width: 80px;
+  margin-right: 6px;
+  font: 12px/130% arial, helvetica;
+  color: #333;
+  height: 16px;
+  padding: 2px 0px 0 3px;
+  border-top: solid 1px #67676a;
+  border-left: solid 1px #67676a;
+  border-bottom: solid 1px #ccc;
+  border-right: solid 1px #ccc;
+  background: #f7f9fa;
+}
+.smallest-field {
+  width: 18px;
+  margin-right: 6px;
+  font: 90%/130% arial, helvetica;
+  color: #333;
+  height: 16px;
+  padding: 2px 0px 0 3px;
+  border-top: solid 1px #67676a;
+  border-left: solid 1px #67676a;
+  border-bottom: solid 1px #ccc;
+  border-right: solid 1px #ccc;
+  background: #f7f9fa;
+}
+
+select {
+  height: 20px;
+  font: 90%/130% arial, helvetica;
+  color: #333;
+  padding: 2px 0px 0 3px;
+  background: #f7f9fa;
+}
+textarea {
+  height: 150px;
+  width: 300px;
+  font: 90%/130% arial, helvetica;
+  color: #333;
+  padding: 2px 0px 0 3px;
+  border-top: solid 1px #67676a;
+  border-left: solid 1px #67676a;
+  border-bottom: solid 1px #ccc;
+  border-right: solid 1px #ccc;
+  background: #f7f9fa;
+}
+
+/******************* FORM TABLE ***************************/
+
+.formDiv {
+  background: #f9f9f9;
+  padding: 20px 0 20px 20px;
+  border-bottom: 1px solid #ccc;
+}
+
+.heading {
+  height: 15px;
+  color: #999;
+  background: #f6f8f9;
+  padding: 5px;
+  margin: 0px 0 15px 0;
+  font-weight: bold;
+}
+fieldset {
+  margin: 0 0 10px 0;
+  padding: 20px;
+}
+legend {
+  padding: 0 8px 0 4px;
+  color: #265e99;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.form-spacing {
+  margin: 14px 0 0px 0;
+}
+
+.cell-one {
+  width: 100px;
+  text-align: right;
+  padding: 2px;
+}
+.cell-two {
+  width: 210px;
+  padding: 2px;
+}
+.cell-three {
+  width: 200px;
+  padding: 2px;
+  color: #ff0000;
+}
+.two-cells {
+  padding: 2px;
+}
+
+.right-button {
+  float: right;
+  margin: 5px 3px 5px 0;
+}
+.standardButton {
+  padding: 3px 10px 2px 10px;
+}
+.standardButton:hover {
+  background: #e9edf2;
+}
+.standardButton:active {
+  position: relative;
+  top: 1px;
+}
+.standardButton:focus {
+  outline: 1px dotted #265e99;
+}
+.standardButton[disabled] {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/********************* MODAL + LOADER *******************************/
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 9999;
+}
+
+.modalPanel {
+  width: 520px;
+  max-width: 100%;
+  background: #fff;
+  border: 1px solid #ccc;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.modalHeader {
+  background: #f9f9f9;
+  border-bottom: 1px solid #ccc;
+  padding: 10px 12px;
+  font-weight: bold;
+}
+
+.modalBody {
+  padding: 12px;
+  color: #333;
+}
+
+.modalActions {
+  padding: 12px;
+  border-top: 1px solid #eee;
+  text-align: right;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #c7d3e0;
+  border-top-color: #265e99;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle;
+  animation: spin 0.9s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingRow {
+  padding: 10px;
+  color: #333;
+}
+
+.vertical-spacing {
+  margin: 20px 0 20px 40px;
+}
+
+/********************* GRID ********************************/
+
+.main-grid {
+  margin: 30px 0 10px 130px;
+}
+.gridTable {
+  margin: 8px 0 0 0;
+}
+.heading-cell {
+  background: #265e99;
+  color: #fff;
+  padding: 5px 10px 3px 10px;
+  border-right: 2px solid #fff;
+}
+
+.grid-cell {
+  background: #f5f5f5;
+  padding: 5px 10px 3px 10px;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+}
+.grid-cell-2 {
+  background: #ececec;
+  padding: 5px 10px 3px 10px;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+}
+
+.small-button {
+  font-size: 0.9em;
+}
+
+.alternateRowColor td {
+  background: #ccc;
+}
+
+.green {
+  color: green;
+}
+.red {
+  color: red;
+  font-weight: bold;
+}
+

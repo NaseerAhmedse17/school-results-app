@@ -1,17 +1,31 @@
 "use client";
 
-import { useMediaQuery } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { readJson } from "@/lib/api/client";
 import type { ClientApiErrorBody } from "@/lib/results/clientApi";
 import type { ResultFieldErrors, ResultFormValues, ResultListItem } from "@/lib/results/contracts";
 import { normalizeFieldErrors } from "@/lib/results/fieldErrors";
-import type { SnackbarState } from "@/lib/ui/snackbar";
+
+type SubmitOutcome =
+  | { ok: true; mode: "create" | "edit" }
+  | { ok: false; kind: "fieldErrors"; fieldErrors: ResultFieldErrors }
+  | { ok: false; kind: "error"; message: string };
+
+type DeleteOutcome =
+  | { ok: true; deletedCount: number }
+  | { ok: false; kind: "error"; message: string };
 
 export function useResultsPage(props: { initialResults: ResultListItem[] }) {
-  const theme = useTheme();
-  const isStackedLayout = useMediaQuery(theme.breakpoints.down("lg"));
+  const [isStackedLayout, setIsStackedLayout] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 1024px)");
+    const update = () => setIsStackedLayout(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   const [results, setResults] = useState<ResultListItem[]>(props.initialResults);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
@@ -20,25 +34,11 @@ export function useResultsPage(props: { initialResults: ResultListItem[] }) {
   const [loadingList, setLoadingList] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [snackbar, setSnackbar] = useState<SnackbarState>({
-    open: false,
-    message: "",
-    severity: "info",
-  });
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const initialValues: ResultFormValues = useMemo(() => {
     if (!editing) return { fullName: "", marks: "", feePaid: "" };
     return { fullName: editing.fullName, marks: String(editing.marks), feePaid: editing.feePaid ? "yes" : "no" };
   }, [editing]);
-
-  const showSnackbar = useCallback((message: string, severity: SnackbarState["severity"] = "info") => {
-    setSnackbar({ open: true, message, severity });
-  }, []);
-
-  const closeSnackbar = useCallback(() => {
-    setSnackbar((s) => ({ ...s, open: false }));
-  }, []);
 
   const refresh = useCallback(async () => {
     setLoadingList(true);
@@ -53,7 +53,7 @@ export function useResultsPage(props: { initialResults: ResultListItem[] }) {
   }, []);
 
   const submit = useCallback(
-    async (values: { fullName: string; marks: number; feePaid: boolean }) => {
+    async (values: { fullName: string; marks: number; feePaid: boolean }): Promise<SubmitOutcome> => {
       setServerFieldErrors(null);
       const isEdit = Boolean(editing);
       setSubmitting(true);
@@ -69,23 +69,19 @@ export function useResultsPage(props: { initialResults: ResultListItem[] }) {
           const fields = normalizeFieldErrors(err.error?.fieldErrors);
           if (fields) {
             setServerFieldErrors(fields);
-            return;
+            return { ok: false, kind: "fieldErrors", fieldErrors: fields };
           }
-          showSnackbar(err.error?.message ?? "Could not save the result.", "error");
-          return;
+          return { ok: false, kind: "error", message: err.error?.message ?? "Could not save the result." };
         }
 
         setEditing(null);
         await refresh();
-        showSnackbar(
-          isEdit ? "Student result updated successfully." : "Student result added successfully.",
-          "success"
-        );
+        return { ok: true, mode: isEdit ? "edit" : "create" };
       } finally {
         setSubmitting(false);
       }
     },
-    [editing, refresh, showSnackbar]
+    [editing, refresh]
   );
 
   const toggle = useCallback((id: string, checked: boolean) => {
@@ -110,12 +106,10 @@ export function useResultsPage(props: { initialResults: ResultListItem[] }) {
 
   const openDeleteConfirm = useCallback(() => {
     if (selectedIds.size === 0) return;
-    setDeleteConfirmOpen(true);
   }, [selectedIds]);
 
   const confirmDeleteSelected = useCallback(async () => {
-    if (selectedIds.size === 0) return;
-    setDeleteConfirmOpen(false);
+    if (selectedIds.size === 0) return { ok: true as const, deletedCount: 0 };
     const ids = Array.from(selectedIds);
     setDeleting(true);
     try {
@@ -126,17 +120,16 @@ export function useResultsPage(props: { initialResults: ResultListItem[] }) {
       });
       if (!res.ok) {
         const err = await readJson<ClientApiErrorBody>(res);
-        showSnackbar(err.error?.message ?? "Could not delete the selected records.", "error");
-        return;
+        return { ok: false as const, kind: "error", message: err.error?.message ?? "Could not delete the selected records." };
       }
       const data = await readJson<{ deletedCount: number }>(res);
       const n = data.deletedCount ?? ids.length;
       await refresh();
-      showSnackbar(n === 1 ? "Successfully deleted 1 record." : `Successfully deleted ${n} records.`, "success");
+      return { ok: true as const, deletedCount: n };
     } finally {
       setDeleting(false);
     }
-  }, [selectedIds, refresh, showSnackbar]);
+  }, [selectedIds, refresh]) as unknown as () => Promise<DeleteOutcome>;
 
   return {
     isStackedLayout,
@@ -150,10 +143,6 @@ export function useResultsPage(props: { initialResults: ResultListItem[] }) {
     loadingList,
     submitting,
     deleting,
-    snackbar,
-    closeSnackbar,
-    deleteConfirmOpen,
-    setDeleteConfirmOpen,
     submit,
     toggle,
     toggleMany,
